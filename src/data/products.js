@@ -5,7 +5,7 @@ export const BREADS = [
         title: 'Pan de yema',
         description: 'clasico y delicioso pan de yema',
         weight: '60gr',
-        price: 1.00,
+        price: 1.20,
     },
     {
         id: 2,
@@ -29,7 +29,7 @@ export const BREADS = [
         title: 'Pan Frances integral',
         description: 'clasico y tierno pan frances integral',
         weight: '90gr',
-        price: 2.00,
+        price: 2.25,
     },
     {
         id: 5,
@@ -37,7 +37,7 @@ export const BREADS = [
         title: 'Pan de trigo',
         description: 'clasico y delicioso pan de trigo',
         weight: '60gr',
-        price: 1.00,
+        price: 1.15,
     },
     {
         id: 6,
@@ -45,7 +45,7 @@ export const BREADS = [
         title: 'Pan de hamburguesa',
         description: 'clasico y delicioso pan de hamburguesa',
         weight: '60gr',
-        price: 1.00,
+        price: 1.55,
     },
     {
         id: 7,
@@ -53,7 +53,7 @@ export const BREADS = [
         title: 'Pan de maíz',
         description: 'clasico y delicioso pan de maíz',
         weight: '60gr',
-        price: 1.00,
+        price: 1.75,
     },
     {
         id: 8,
@@ -61,7 +61,7 @@ export const BREADS = [
         title: 'Pan de centeno',
         description: 'clasico y delicioso pan de centeno',
         weight: '60gr',
-        price: 1.00,
+        price: 1.95,
     },
     {
         id: 9,
@@ -69,6 +69,6 @@ export const BREADS = [
         title: 'Pan de cebada',
         description: 'clasico y delicioso pan de cebada',
         weight: '60gr',
-        price: 1.00,
+        price: 1.90,
     }
 ]
