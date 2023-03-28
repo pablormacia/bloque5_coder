@@ -1,42 +1,59 @@
-import { URL_AUTH_SIGNUP } from "../../constants/database";
+import { URL_AUTH_SIGN_UP, URL_AUTH_SIGN_IN } from "../../constants/database";
 
 export const SIGN_UP = "SIGN_UP"
+export const SIGN_IN = "SIGN_IN"
 
-export const signUp = (email, password) => {
-    return async dispatch => {
-        try {
-            const response = await fetch(URL_AUTH_SIGNUP, {
-                method: 'POST',
-                header: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    returnSecureToken: true,
-                })
-            })
+export const signup = (email, password) => {
+    return async (dispatch) => {
+      try {
+        const response = await fetch(URL_AUTH_SIGN_UP, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        });
+        const data = await response.json();
+        console.warn(data);
+  
+        dispatch({
+          type: SIGN_UP,
+          token: data.idToken,
+          userId: data.localId,
+        });
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+  };
 
-            if (!response.ok) {
-                const errorResponse = await response.json()
-                const errorId = errorResponse.error.message
-
-                let message = "No se ha podido registrar"
-                if (errorId === 'EMAIL_EXISTS') message = 'Este email ya fue registrado'
-
-                throw new error(message)
-            }
-
-            const data = await response.json();
-            console.log(data)
-            dispatch({
-                type: SIGN_UP,
-                token: data.idToken,
-                userId: data.localId,
-            })
-        }
-        catch (error) {
-            console.log(error.message)
-        }
-    }
-}
+export const signin = (email, password) => {
+    return async (dispatch) => {
+      try {
+        const response = await fetch(URL_AUTH_SIGN_IN, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        });
+        const data = await response.json();
+        console.warn(data);
+        dispatch({
+          type: SIGN_IN,
+          token: data.idToken,
+          userId: data.localId,
+        });
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+  };

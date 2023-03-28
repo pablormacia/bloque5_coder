@@ -1,116 +1,130 @@
-import { StyleSheet, Text, View, KeyboardAvoidingView, TouchableOpacity, TextInput } from "react-native";
-import React, { useState } from "react";
+import { StyleSheet,Button, Text, View, KeyboardAvoidingView, TouchableOpacity, TextInput } from "react-native";
+import React, { useState, useReducer } from "react";
 import colors from "../constants/colors";
-import { useDispatch, useReducer } from "react-redux";
-import { signUp } from "../store/actions/auth.action";
+import { useDispatch } from "react-redux";
+import { signup, signin } from "../store/actions/auth.action"
 
-const FORM_INPUT_UPDATE = 'FORM_INPUT_UPDATE';
+import Input from "../components/Input";
+import { onInputChange, onFocusOut, UPDATED_FORM } from "../utils/forms"
 
-export const formReducer = (state,action) => {
-    if(action.type===FORM_INPUT_UPDATE) {
-        const inputValues = {
-            ...state.inputValues,
-            [action.input]:action.value,
-        }
-        const inputValidities = {
-            ...state.inputValidities,
-            [action.input]: action.isValid,
-        }
-        let formIsValid = true
+const initialState = {
+    email: { value: "", touched: false, hasError: true, error: "" },
+    password: { value: "", touched: false, hasError: true, error: "" },
+    isFormValid: false,
+};
 
-        for (const key in inputValidities) {
-            formIsValid = formIsValid && inputValidities[key]
-        }
-
-        return {
-            formIsValid,
-            inputValues,
-            inputValidities,
-        }
+const formReducer = (state, action) => {
+    switch (action.type) {
+        case UPDATED_FORM:
+            const { name, value, hasError, error, touched, isFormValid } = action.data;
+            return {
+                ...state,
+                [name]: {
+                    ...state[name],
+                    value,
+                    hasError,
+                    error,
+                    touched,
+                },
+                isFormValid,
+            };
+        default:
+            return state;
     }
-    return state;
-}
+};
 
 
 const AuthScreen = () => {
-    const title = "REGISTRO";
+    /* const title = "REGISTRO";
     const message = "¿Ya tienes cuenta?";
     const messageAction = "Ingresar";
-    const messageTarget = "Login";
+    const messageTarget = "Login"; */
 
-    const dispatch = useDispatch()
     //const [email,setEmail] = useState('');
     //const [password,setPassword] = useState('')
 
-   /*  const onHandleSignUp = () => {
-        console.log("SignUp", email, password)
-        dispatch(signUp(email,password))
-    }
+    /*  const onHandleSignUp = () => {
+         console.log("SignUp", email, password)
+         dispatch(signUp(email,password))
+     }
+ 
+     const onHandleEmailInput = (data) => {
+         setEmail(data)
+         //console.log(email)
+     }
+ 
+     const onHandlePasswordInput = (datas) => {
+         setPassword(datas)
+         //console.log(password)
+     } */
 
-    const onHandleEmailInput = (data) => {
-        setEmail(data)
-        //console.log(email)
-    }
+    const dispatch = useDispatch();
+    const [isLogin, setIsLogin] = useState(true);
+    const [formState, dispatchFormState] = useReducer(formReducer, initialState);
+    const title = isLogin ? "Login" : "Registro";
+    const message = isLogin ? "¿No tienes una cuenta?" : "¿Ya tienes una cuenta?";
+    const messageAction = isLogin ? "Ingresar" : "Registrate";
+    const messageTarget = isLogin ? "Ingresar" : "Registrate";
+    const onHandleAuth = () => {
+        const { email, password } = formState;
+        dispatch(isLogin ? signin(email.value, password.value) : signup(email.value, password.value));
+    };
 
-    const onHandlePasswordInput = (datas) => {
-        setPassword(datas)
-        //console.log(password)
-    } */
+    const onHandleChangeAuth = () => {
+        setIsLogin(!isLogin);
+    };
 
-    const [formState, formDispatch] = useReducer(formReducer, {
-        inputValues: {
-            email: '',
-            password: '',
-        },
-        inputValidities: {
-            email: false,
-            password: false,
-        },
-        formIsValid: false
-    })
+    const onHandleChange = (value, type) => {
+        onInputChange(type, value, dispatchFormState, formState);
+    };
 
-    const onHandleSignUp = () => {
-        if (formState.formIsValid) {
-            dispatch (signUp(formState.inputValues.email,formState.inputValues.password))
-        } else {
-            Alert.alert(
-                'Formulario inválido',
-                'Ingresa email válido'
-            )
-        }
-    }
-
-    const onHandleInputChange = useCallback((inputIdentifier,inputValue,inputValidity) => {
-        formDispatch({
-            type: FORM_INPUT_UPDATE,
-            value: inputValue,
-            isValid: inputValidity,
-            input: inputIdentifier
-        })
-    }, [formDispatch])
-
+    const onHandleBlur = (text, type) => {
+        onFocusOut(type, text, dispatchFormState, formState);
+    };
     return (
-        <KeyboardAvoidingView behavior="height" style={styles.screen}>
+        <KeyboardAvoidingView style={styles.containerKeyboard} behavior="padding">
             <View style={styles.container}>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
+                <Input
                     style={styles.input}
+                    placeholder="Ingrese su email"
+                    placeholderTextColor={colors.placerholder}
+                    autoCapitalize="none"
+                    autoCorrect={false}
                     keyboardType="email-address"
-                    autoCapitalize="none"
-                    onChangeText = {onHandleEmailInput}
+                    onChangeText={(text) => onHandleChange(text, "email")}
+                    onBlur={(e) => onHandleBlur(e.nativeEvent.text, "email")}
+                    value={formState.email.value}
+                    hasError={formState.email.hasError}
+                    error={formState.email.error}
+                    touched={formState.email.touched}
+                    label="Correo electronico"
                 />
-                <Text style={styles.label}>Clave</Text>
-                <TextInput
+                <Input
                     style={styles.input}
-                    secureTextEntry
+                    placeholder="Ingrese su contraseña"
+                    placeholderTextColor={colors.placerholder}
                     autoCapitalize="none"
-                    onChangeText = {onHandlePasswordInput}
+                    autoCorrect={false}
+                    secureTextEntry
+                    onChangeText={(text) => onHandleChange(text, "password")}
+                    onBlur={(e) => onHandleBlur(e.nativeEvent.text, "password")}
+                    value={formState.password.value}
+                    hasError={formState.password.hasError}
+                    error={formState.password.error}
+                    touched={formState.password.touched}
+                    label="Contraseña"
                 />
+                <Button
+                    disabled={!formState.isFormValid}
+                    title={messageTarget}
+                    color={colors.primary}
+                    onPress={onHandleAuth}
+                />
+
                 <View style={styles.prompt}>
-                    <Text style={styles.promptMessage}>{message}</Text>
-                    <TouchableOpacity  onPress={()=>onHandleSignUp(email,password)}>
-                        <Text style={styles.messageAction}>{messageAction}</Text>
+                    <TouchableOpacity onPress={onHandleChangeAuth}>
+                        <Text style={styles.promptMessage}>{message}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -121,56 +135,44 @@ const AuthScreen = () => {
 export default AuthScreen;
 
 const styles = StyleSheet.create({
-    screen: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    title: {
-        fontSize: 24,
-        marginBottom: 18,
-        textAlign: 'center'
+    containerKeyboard: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
     },
     container: {
-        width: '80%',
-        maxWidth: 400,
-        padding: 12,
-        margin: 12,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 10,
-        backgroundColor: 'white'
+      width: "80%",
+      height: 340,
+      maxWidth: 400,
+      padding: 15,
+      margin: 15,
+      borderColor: colors.primary,
+      borderWidth: 1,
+      borderRadius: 10,
+      backgroundColor: colors.white,
     },
-    prompt: {
-        alignItems: 'center'
-    },
-    promptMessage: {
-        fontSize: 16,
-        color: '#333',
-        marginTop:20,
-    },
-    promptButton: {
-        fontSize: 16,
-        color: colors.primary,
-    },
-    button: {
-        backgroundColor: colors.primary,
-        marginVertical: 20,
-    },
-    messageAction: {
-        backgroundColor: colors.primary,
-        width:200,
-        textAlign: 'center',
-        padding: 10,
-        margin:10,
-        color: '#fff'
-    },
-    input: {
-        paddingVertical:6,
-        borderBottomColor: "#ccc",
-        borderBottomWidth:1,
+    title: {
+      fontSize: 18,
+      //fontFamily: "Lato-Regular",
+      marginBottom: 15,
+      textAlign: "center",
     },
     label: {
-        marginVertical: 5,
-    }
-});
+      fontSize: 14,
+      //fontFamily: "Lato-Regular",
+      marginVertical: 5,
+    },
+    prompt: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    promptMessage: {
+      fontSize: 14,
+      //fontFamily: "Lato-Bold",
+      color: colors.text,
+      marginRight: 15,
+    },
+    promptButton: {},
+  });
+  
